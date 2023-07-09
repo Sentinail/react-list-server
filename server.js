@@ -33,8 +33,11 @@ app.post("/list", (req, res, next) => {
             let list = JSON.parse(data)
             let newListData = {
                 id: list.length > 0 ? list[list.length - 1].id + 1 : 1,
-                data: listData
+                data: listData,
+                done: false
             }
+
+            console.log(newListData)
 
             list.push(newListData)
 
@@ -44,6 +47,37 @@ app.post("/list", (req, res, next) => {
                     res.status(500).send("Server Error");
                 } else {
                     res.status(200).send("New Item Added");
+                }
+            })
+        }
+    })
+})
+
+app.patch("/list", (req, res, next) => {
+    console.log(req.body)
+    let isDone = req.body.isDone
+    let id = req.body.listID
+
+    fs.readFile(path.join(__dirname, "ListData", "listData.json"), "utf8", (err, data) => {
+        if (err) {
+            console.log(err)
+            res.status(500).send("Server Error")
+        } else {
+
+            let list = JSON.parse(data)
+
+            for (let i=0; i < list.length; i++) {
+                if (list[i].id === id) {
+                    list[i].done = isDone
+                }
+            }
+
+            fs.writeFile(path.join(__dirname, "ListData", "listData.json"), JSON.stringify(list, null, 2), "utf-8", (err) => {
+                if (err) {
+                    console.log(err)
+                    res.status(500).send("Server Error");
+                } else {
+                    res.status(200).send("Task Done");
                 }
             })
         }
